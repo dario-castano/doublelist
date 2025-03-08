@@ -22,12 +22,13 @@ public class DoubleLinkedList implements ListGateway {
             throw new IndexOutOfBoundsException("La posición que estas buscando está fuera de rango");
         }
 
-        var node = head;
+        Node node = head;
+        while (node != null && !node.getIndex().equals(position)) {
+            node = node.getNext();
+        }
 
-        while (node != null) {
-            if (node.getIndex() != position) {
-                node = node.getNext();
-            }
+        if (node == null) {
+            throw new IndexOutOfBoundsException("Node not found at position: " + position);
         }
 
         return node.getValue();
@@ -35,44 +36,118 @@ public class DoubleLinkedList implements ListGateway {
 
     @Override
     public Integer find(String value) {
-        return 0;
+        Node node = head;
+        while (node != null) {
+            if (node.getValue().equals(value)) {
+                return node.getIndex();
+            }
+            node = node.getNext();
+        }
+        return -1;
     }
 
     @Override
     public void print() {
-
+        Node node = head;
+        while (node != null) {
+            System.out.print(node.getValue() + " ");
+            node = node.getNext();
+        }
+        System.out.println();
     }
 
     @Override
     public void put(String value) {
-        var node = head;
-        var counter = 0;
-
-        while (node.getNext() != null) {
-            node = node.getNext();
-            counter++;
+        if (head == null) {
+            head = new Node(null, null, 0, value);
+        } else {
+            Node node = head;
+            while (node.getNext() != null) {
+                node = node.getNext();
+            }
+            node.setNext(new Node(node, null, count, value));
         }
-
-        node.setNext(new Node(node, null, counter, value));
+        count++;
     }
 
     @Override
     public void delete(String value) {
-
+        Node node = head;
+        while (node != null) {
+            if (node.getValue().equals(value)) {
+                if (node.getPrevious() != null) {
+                    node.getPrevious().setNext(node.getNext());
+                } else {
+                    head = node.getNext();
+                }
+                if (node.getNext() != null) {
+                    node.getNext().setPrevious(node.getPrevious());
+                }
+                count--;
+                return;
+            }
+            node = node.getNext();
+        }
     }
 
     @Override
     public void deleteAt(Integer position) {
+        if (position >= count || position < 0) {
+            throw new IndexOutOfBoundsException("La posición que estas buscando está fuera de rango");
+        }
 
+        Node node = head;
+        while (node != null && !node.getIndex().equals(position)) {
+            node = node.getNext();
+        }
+
+        if (node != null) {
+            if (node.getPrevious() != null) {
+                node.getPrevious().setNext(node.getNext());
+            } else {
+                head = node.getNext();
+            }
+            if (node.getNext() != null) {
+                node.getNext().setPrevious(node.getPrevious());
+            }
+            count--;
+        }
     }
 
     @Override
     public void concat(ListGateway list) {
+        if (list == null || list.length() == 0) {
+            return;
+        }
 
+        Node lastNode = head;
+        while (lastNode != null && lastNode.getNext() != null) {
+            lastNode = lastNode.getNext();
+        }
+
+        // Append the new list
+        for (int i = 0; i < list.length(); i++) {
+            String value = list.getValueAt(i);
+            if (lastNode == null) {
+                head = new Node(null, null, count, value);
+                lastNode = head;
+            } else {
+                lastNode.setNext(new Node(lastNode, null, count, value));
+                lastNode = lastNode.getNext();
+            }
+            count++;
+        }
     }
 
     @Override
     public void replace(String value, String replacement) {
-
+        Node node = head;
+        while (node != null) {
+            if (node.getValue().equals(value)) {
+                node.setValue(replacement);
+                return;
+            }
+            node = node.getNext();
+        }
     }
 }
